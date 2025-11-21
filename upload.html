@@ -9,55 +9,55 @@
     h1 { color: #00ffcc; }
     input, button { margin: 15px; padding: 10px; border-radius: 8px; border: none; }
     button { background: #00ffcc; color: black; cursor: pointer; font-weight: bold; }
-    .status { margin-top: 30px; color: #0f0; }
-    .error { color: red; }
+    .status { margin-top: 30px; color: #0f0; font-size: 18px; }
   </style>
 </head>
 <body>
   <h1>📤 Upload CSV – GLOWAIX AI Email Sender</h1>
+  
   <input type="file" id="csvFile" accept=".csv">
   <br>
   <button onclick="uploadCSV()">Upload & Send</button>
-  <div id="status"></div>
+
+  <div class="status" id="status"></div>
 
   <script>
     async function uploadCSV() {
       const fileInput = document.getElementById("csvFile");
+      const statusDiv = document.getElementById("status");
+
       if (!fileInput.files.length) {
-        alert("Please select a CSV file!");
+        alert("Please select a CSV file first!");
         return;
       }
+
+      statusDiv.innerText = "⏳ Uploading and sending emails...";
 
       const formData = new FormData();
       formData.append("file", fileInput.files[0]);
 
-      document.getElementById("status").innerHTML = "<span>⏳ Uploading & sending emails...</span>";
-
       try {
         const res = await fetch(
-          "https://script.google.com/macros/s/AKfycbw78pLQ1uKnCAjy3ak_ZJuOOOFgLISMBSfGTrgyXIr6-Xxj2M9W21Tz8IE9hSqyfaki/exec",
+          "https://script.google.com/macros/s/AKfycbyojiHy1NTePqufTFJVJauE342sD_-hjM5xa8kjfe8wkxd_cILDeCBXga3v9DQkbB4u/exec",
           {
             method: "POST",
             body: formData,
-            headers: { "Accept": "application/json" }
           }
         );
 
         const data = await res.json();
 
         if (data.success) {
-          document.getElementById("status").innerHTML =
-            `<span class="status">✅ Done! ${data.sent} sent, ${data.failed} failed (Total: ${data.total})</span>`;
+          statusDiv.innerHTML =
+            `✅ Done! <br>${data.sent} sent, ${data.failed} failed <br>(Total: ${data.total})`;
         } else {
-          document.getElementById("status").innerHTML =
-            `<span class="error">❌ Error: ${data.error}</span>`;
+          statusDiv.innerHTML = "❌ Server Error: " + data.error;
         }
-
       } catch (err) {
-        document.getElementById("status").innerHTML =
-          `<span class="error">❌ Upload failed: ${err.message}</span>`;
+        statusDiv.innerHTML = "❌ Upload failed: " + err.message;
       }
     }
   </script>
+
 </body>
 </html>
