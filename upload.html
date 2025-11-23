@@ -4,60 +4,81 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GLOWAIX CSV Upload</title>
+
   <style>
-    body { font-family: Arial; background: #0b0b0b; color: white; text-align: center; padding: 40px; }
+    body {
+      font-family: Arial;
+      background: #0b0b0b;
+      color: white;
+      text-align: center;
+      padding: 40px;
+    }
     h1 { color: #00ffcc; }
-    input, button { margin: 15px; padding: 10px; border-radius: 8px; border: none; }
-    button { background: #00ffcc; color: black; cursor: pointer; font-weight: bold; }
-    .status { margin-top: 30px; color: #0f0; font-size: 18px; }
+    input, button {
+      margin: 15px;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+    }
+    button {
+      background: #00ffcc;
+      color: black;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .status {
+      margin-top: 30px;
+      color: #0f0;
+    }
   </style>
 </head>
+
 <body>
+
   <h1>📤 Upload CSV – GLOWAIX AI Email Sender</h1>
-  
+
   <input type="file" id="csvFile" accept=".csv">
   <br>
   <button onclick="uploadCSV()">Upload & Send</button>
-
   <div class="status" id="status"></div>
 
-  <script>
-    async function uploadCSV() {
-      const fileInput = document.getElementById("csvFile");
-      const statusDiv = document.getElementById("status");
+<script>
+async function uploadCSV() {
+  const fileInput = document.getElementById("csvFile");
 
-      if (!fileInput.files.length) {
-        alert("Please select a CSV file first!");
-        return;
+  if (!fileInput.files.length) {
+    alert("Please select a CSV file first!");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("file", fileInput.files[0]);
+
+  document.getElementById("status").innerText = "⏳ Uploading and sending emails...";
+
+  try {
+    const res = await fetch(
+      "https://script.google.com/macros/s/AKfycbytxev1UQRjfHPM4-gLfL428T3jw6Uhkl_d0mmje4BRHeoXvsVLkbIqPgfSJHIV7hk/exec",
+      {
+        method: "POST",
+        body: formData
       }
+    );
 
-      statusDiv.innerText = "⏳ Uploading and sending emails...";
+    const data = await res.json();
 
-      const formData = new FormData();
-      formData.append("file", fileInput.files[0]);
-
-      try {
-        const res = await fetch(
-          "https://script.google.com/macros/s/AKfycbyojiHy1NTePqufTFJVJauE342sD_-hjM5xa8kjfe8wkxd_cILDeCBXga3v9DQkbB4u/exec",
-          {
-            method: "POST",
-            body: formData,
-          }
-        );
-
-        const data = await res.json();
-
-        if (data.success) {
-          statusDiv.innerHTML =
-            `✅ Done! <br>${data.sent} sent, ${data.failed} failed <br>(Total: ${data.total})`;
-        } else {
-          statusDiv.innerHTML = "❌ Server Error: " + data.error;
-        }
-      } catch (err) {
-        statusDiv.innerHTML = "❌ Upload failed: " + err.message;
-      }
+    if (data.success) {
+      document.getElementById("status").innerText =
+        `✅ Done! ${data.sent} sent, ${data.failed} failed (Total: ${data.total})`;
+    } else {
+      document.getElementById("status").innerText = "❌ Error: " + data.error;
     }
-  </script>
+
+  } catch (err) {
+    document.getElementById("status").innerText = "❌ Upload failed: " + err.message;
+  }
+}
+</script>
 
 </body>
 </html>
